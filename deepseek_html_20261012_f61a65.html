@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>段码屏动画版</title>
+    <style>
+        /* 基础重置与背景 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 主容器入场动画 */
+        .container {
+            background-color: #2a2a2a;
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(76, 175, 80, 0.1);
+            text-align: center;
+            border: 1px solid #333;
+            animation: containerEntry 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        @keyframes containerEntry {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            color: #4CAF50;
+            font-size: 24px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        /* 小灯容器 */
+        .light-board {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            perspective: 1000px;
+        }
+
+        /* 单个小灯基础样式 */
+        .light {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: #1e1e1e;
+            border: 3px solid #444;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: #555;
+            font-weight: bold;
+            cursor: default;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.8);
+        }
+
+        /* 灯亮起时的状态 (跑马灯状态) */
+        .light.active {
+            background-color: #4CAF50;
+            border-color: #81C784;
+            color: #fff;
+            box-shadow: 
+                0 0 15px #4CAF50, 
+                0 0 30px #4CAF50,
+                0 0 45px rgba(76, 175, 80, 0.6),
+                inset 0 0 15px #ffffff;
+            transform: scale(1.15);
+            animation: pulseGlow 0.6s infinite alternate;
+        }
+
+        /* 呼吸发光动画 */
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 
+                    0 0 10px #4CAF50, 
+                    0 0 20px #4CAF50,
+                    inset 0 0 10px #ffffff;
+            }
+            100% {
+                box-shadow: 
+                    0 0 25px #4CAF50, 
+                    0 0 50px #4CAF50,
+                    0 0 70px rgba(76, 175, 80, 0.8),
+                    inset 0 0 25px #ffffff;
+            }
+        }
+
+        /* 输入数字时的强调弹跳动画 */
+        .light.pop-anim {
+            animation: popBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popBounce {
+            0% { transform: scale(1); }
+            50% { 
+                transform: scale(1.4); 
+                background-color: #8BC34A;
+                box-shadow: 0 0 60px #8BC34A, inset 0 0 20px #fff;
+            }
+            100% { 
+                transform: scale(1.15); 
+                background-color: #4CAF50;
+            }
+        }
+
+        /* 控制区域样式 */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            background: #222;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* 输入框聚焦时的光晕动画 */
+        .input-group:focus-within {
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3), inset 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        input[type="number"] {
+            padding: 12px 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            width: 120px;
+            outline: none;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="number"]::placeholder {
+            color: #777;
+            font-weight: normal;
+            letter-spacing: 0;
+        }
+
+        input[type="number"]:focus {
+            background-color: #444;
+        }
+
+        /* 隐藏数字输入框的上下箭头 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        /* 按钮样式与动画 */
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        button:active {
+            transform: translateY(2px) scale(0.96);
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        button.stop {
+            background: linear-gradient(135deg, #f44336, #c62828);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        button.stop:hover {
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ 段码屏控制面板 ⚡</h2>
+    
+    <!-- 8个小灯 -->
+    <div class="light-board" id="lightBoard">
+        <div class="light" data-index="1">1</div>
+        <div class="light" data-index="2">2</div>
+        <div class="light" data-index="3">3</div>
+        <div class="light" data-index="4">4</div>
+        <div class="light" data-index="5">5</div>
+        <div class="light" data-index="6">6</div>
+        <div class="light" data-index="7">7</div>
+        <div class="light" data-index="8">8</div>
+    </div>
+
+    <div class="controls">
+        <!-- 循环控制 -->
+        <div>
+            <button id="loopBtn" onclick="toggleLoop()">🚀 开始循环点亮</button>
+        </div>
+        
+        <!-- 数字输入控制 -->
+        <div class="input-group">
+            <input type="number" id="numInput" min="1" max="8" placeholder="输入1-8" onkeyup="handleKeyUp(event)">
+            <button onclick="showSpecificLight()">🎯 点亮对应灯</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const lights = document.querySelectorAll('.light');
+    let loopInterval = null;
+    let currentIndex = 0;
+    let isLooping = false;
+
+    // 清除所有灯的状态和动画类
+    function clearAllLights() {
+        lights.forEach(light => {
+            light.classList.remove('active');
+            light.classList.remove('pop-anim');
+        });
+    }
+
+    // 循环点亮逻辑
+    function toggleLoop() {
+        const loopBtn = document.getElementById('loopBtn');
+        
+        if (isLooping) {
+            // 停止循环
+            clearInterval(loopInterval);
+            isLooping = false;
+            loopBtn.innerText = "🚀 开始循环点亮";
+            loopBtn.classList.remove('stop');
+            clearAllLights();
+        } else {
+            // 开始循环
+            isLooping = true;
+            loopBtn.innerText = "⏹️ 停止循环";
+            loopBtn.classList.add('stop');
+            currentIndex = 0;
+            
+            // 先清除输入框焦点，避免冲突
+            document.getElementById('numInput').blur();
+
+            loopInterval = setInterval(() => {
+                // 清除上一次的亮灯状态
+                lights.forEach(l => l.classList.remove('active'));
+                // 点亮当前灯
+                lights[currentIndex].classList.add('active');
+                // 索引循环
+                currentIndex = (currentIndex + 1) % 8;
+            }, 250); // 250毫秒切换一次，速度适中
+        }
+    }
+
+    // 输入数字点亮对应的灯
+    function showSpecificLight() {
+        const inputVal = document.getElementById('numInput').value;
+        const num = parseInt(inputVal);
+
+        // 校验输入
+        if (isNaN(num) || num < 1 || num > 8) {
+            // 输入错误时抖动输入框
+            const inputGroup = document.querySelector('.input-group');
+            inputGroup.style.animation = 'none';
+            inputGroup.offsetHeight; // 触发重绘
+            inputGroup.style.animation = 'shake 0.4s ease';
+            
+            setTimeout(() => {
+                inputGroup.style.animation = '';
+            }, 400);
+            
+            alert("请输入 1 到 8 之间的有效数字！");
+            return;
+        }
+
+        // 如果正在循环，先停止循环
+        if (isLooping) {
+            toggleLoop();
+        }
+
+        // 清除其他灯的状态
+        clearAllLights();
+        
+        // 点亮对应的灯，并加上强调动画
+        const targetLight = lights[num - 1];
+        targetLight.classList.add('active');
+        targetLight.classList.add('pop-anim');
+        
+        // 动画结束后移除弹跳类，恢复正常呼吸状态
+        setTimeout(() => {
+            targetLight.classList.remove('pop-anim');
+        }, 600);
+    }
+
+    // 支持按回车键直接触发点亮
+    function handleKeyUp(event) {
+        if (event.key === 'Enter') {
+            showSpecificLight();
+        }
+    }
+
+    // 给输入框添加抖动动画的 CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-5px); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+</body>
+</html>
